@@ -57,7 +57,7 @@ class MyFrame
         intFormatter.setAllowsInvalid(true);
         intFormatter.setCommitsOnValidEdit(true);
 
-        setTitle("Registration Form");
+        setTitle("Rozpoznawanie Roślin");
         setBounds(300, 90, 900, 600);
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setResizable(false);
