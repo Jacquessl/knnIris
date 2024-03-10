@@ -36,7 +36,7 @@ class MyFrame
         formatter.setValueClass(Float.class);
         formatter.setMinimum(0.0f);
         formatter.setMaximum(Float.MAX_VALUE);
-        formatter.setAllowsInvalid(true);
+        formatter.setAllowsInvalid(false);
         formatter.setCommitsOnValidEdit(true);
 
 
