@@ -205,7 +205,7 @@ class MyFrame
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             int currentIndex = 0;
-                            for (int i = 0; i < textFields.length - 1; i++) {
+                            for (int i = 0; i < textFields.length; i++) {
                                 str[i].replace(".", ",");
                                 if (currentIndex < str[i].length()) {
                                     textFields[i].setText(str[i].substring(0, currentIndex + 1));
