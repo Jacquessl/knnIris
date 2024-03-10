@@ -27,7 +27,11 @@ class MyFrame
     private NumberFormatter intFormatter;
     private NumberFormatter formatter;
     private boolean workerDone = true;
-
+    private List<String[]> testData;
+    private int testIndex;
+    private int accurateTest;
+    private int possibleTest;
+    private boolean wypisywacDokladnosc = false;
     public MyFrame(List<String[]> data)
     {
         this.data = data;
@@ -176,15 +180,23 @@ class MyFrame
             AnalyzeData ad = new AnalyzeData(data, dataToAnalyze, (Integer) k.getValue());
             String result = ad.analyze();
 
-            // jak jest wszystko dobrze wyswietlic zdjecie
-            // jak nie to wypisac wiadomosc o bledzie (np k wieksze niz jest dostepnych elementów)
             dataToPrint+=result+"<br>";
             tout.setContentType("text/html");
             ClassLoader classLoader = getClass().getClassLoader();
             URL imageURL = classLoader.getResource("file:/img/" + result.toLowerCase() + ".jpg");
-            tout.setText("<html><body><div style='font-family: Arial, Helvetica, sans-serif; font-size: 15pt; text-align: center;'>"+ dataToPrint +
-                    "<img src=\'file:img\\" + result.toLowerCase() +".jpg\'/></div></body></html>");
-
+            if(wypisywacDokladnosc) {
+                if (result.equals(testData.get(testIndex)[4].replace("\r", ""))) {
+                    accurateTest++;
+                }
+                double dokladnosc = (double) (accurateTest) / (double) possibleTest;
+                int dokladnoscDoWypisania = (int) (dokladnosc * 100);
+                tout.setText("<html><body><div style='font-family: Arial, Helvetica, sans-serif; font-size: 15pt; text-align: center;'>" + dataToPrint +
+                        "<img src=\'file:img\\" + result.toLowerCase() + ".jpg\'/><br>Dokladność: " + dokladnoscDoWypisania + "%</div></body></html>");
+            }
+            else{
+                tout.setText("<html><body><div style='font-family: Arial, Helvetica, sans-serif; font-size: 15pt; text-align: center;'>" + dataToPrint +
+                        "<img src=\'file:img\\" + result.toLowerCase() + ".jpg\'/></div></body></html>");
+            }
             tout.setEditable(false);
         }
         else if (e.getSource() == reset) {
@@ -201,36 +213,42 @@ class MyFrame
             intFormatter.setAllowsInvalid(false);
         }
         else if(e.getSource() == zbiorTestowy) {
-            if ((int)k.getValue() > 0) {
-                int kValue = (int)k.getValue();
+            try {
+                int kValue = (int) k.getValue();
                 ReadData rd = new ReadData("irisTest.txt");
-                List<String[]> testData = rd.readData();
+                testData = rd.readData();
+                accurateTest = 0;
+                possibleTest = 1;
                 JFormattedTextField[] textFields = {dlugoscListka, szerokoscListka, dlugoscPlatka, szerokoscPlatka};
-                    SwingWorker<Void, String> worker = new SwingWorker<Void, String>() {
-                        @Override
-                        protected Void doInBackground() throws Exception {
-                            for (String[] str : testData) {
-                                for (int i = 0; i < textFields.length; i++) {
-                                    textFields[i].setText(str[i].replace(".", ","));
-                                    Thread.sleep(100);
-                                }
-                                k.setText("" + kValue);
-                                sub.doClick();
-                                Thread.sleep(2000);
-                                reset.doClick();
+                SwingWorker<Void, String> worker = new SwingWorker<Void, String>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        for (String[] str : testData) {
+                            for (int i = 0; i < textFields.length; i++) {
+                                textFields[i].setText(str[i].replace(".", ","));
+                                Thread.sleep(100);
                             }
-                            return null;
+                            wypisywacDokladnosc = true;
+                            k.setText("" + kValue);
+                            sub.doClick();
+                            testIndex++;
+                            possibleTest++;
+                            Thread.sleep(2000);
+                            reset.doClick();
+                            wypisywacDokladnosc=false;
                         }
-                        @Override
-                        protected void done () {
-                            workerDone = true;
-                        }
-                    };
-                    worker.execute();
+                        return null;
+                    }
+
+                    @Override
+                    protected void done() {
+                        workerDone = true;
+                    }
+                };
+                worker.execute();
+            } catch (NullPointerException exc) {
+                tout.setText("Wpisz ilość sąsiadów");
             }
-        }
-        else{
-            tout.setText("Wpisz ilość sąsiadów");
         }
     }
 }
