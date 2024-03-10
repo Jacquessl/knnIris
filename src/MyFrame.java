@@ -2,10 +2,10 @@ import javax.swing.*;
 import javax.swing.text.NumberFormatter;
 import java.awt.*;
 import java.awt.event.*;
+import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.List;
-
 
 class MyFrame
         extends JFrame
@@ -22,10 +22,11 @@ class MyFrame
     private JButton sub;
     private JButton reset;
     private JButton zbiorTestowy;
-    private JTextArea tout;
+    private JTextPane tout;
     private List<String[]> data;
     private NumberFormatter intFormatter;
     private NumberFormatter formatter;
+    private boolean workerDone = true;
 
     public MyFrame(List<String[]> data)
     {
@@ -147,11 +148,10 @@ class MyFrame
         zbiorTestowy.addActionListener(this);
         c.add(zbiorTestowy);
 
-        tout = new JTextArea();
+        tout = new JTextPane();
         tout.setFont(new Font("Arial", Font.PLAIN, 15));
         tout.setSize(300, 400);
         tout.setLocation(500, 100);
-        tout.setLineWrap(true);
         tout.setEditable(false);
         c.add(tout);
 
@@ -162,23 +162,29 @@ class MyFrame
     {
         if (e.getSource() == sub) {
             String dataToPrint = "Długość Listka : "
-                    + dlugoscListka.getText() + "cm\n"
+                    + dlugoscListka.getText() + "cm<br>"
                     + "Szerokość Listka : "
-                    + szerokoscListka.getText() + "cm\n"
+                    + szerokoscListka.getText() + "cm<br>"
                     + "Długość Płatka : "
-                    + dlugoscPlatka.getText() + "cm\n"
+                    + dlugoscPlatka.getText() + "cm<br>"
                     + "Szerokość Płatka : "
-                    + szerokoscPlatka.getText() + "cm\n"
+                    + szerokoscPlatka.getText() + "cm<br>"
                     + "Ilość sąsiadów : "
-                    + k.getText() +"\n";
+                    + k.getText() +"<br>";
             String[] dataToAnalyze = {dlugoscListka.getText(), szerokoscListka.getText(),
                     dlugoscPlatka.getText(), szerokoscPlatka.getText()};
             AnalyzeData ad = new AnalyzeData(data, dataToAnalyze, (Integer) k.getValue());
-            System.out.println(ad.analyze());
+            String result = ad.analyze();
 
             // jak jest wszystko dobrze wyswietlic zdjecie
             // jak nie to wypisac wiadomosc o bledzie (np k wieksze niz jest dostepnych elementów)
-            tout.setText(dataToPrint);
+            dataToPrint+=result+"<br>";
+            tout.setContentType("text/html");
+            ClassLoader classLoader = getClass().getClassLoader();
+            URL imageURL = classLoader.getResource("file:/img/" + result.toLowerCase() + ".jpg");
+            tout.setText("<html><body><div style='font-family: Arial, Helvetica, sans-serif; font-size: 15pt; text-align: center;'>"+ dataToPrint +
+                    "<img src=\'file:img\\" + result.toLowerCase() +".jpg\'/></div></body></html>");
+
             tout.setEditable(false);
         }
         else if (e.getSource() == reset) {
@@ -196,32 +202,35 @@ class MyFrame
         }
         else if(e.getSource() == zbiorTestowy) {
             if ((int)k.getValue() > 0) {
+                int kValue = (int)k.getValue();
                 ReadData rd = new ReadData("irisTest.txt");
                 List<String[]> testData = rd.readData();
-
-                for (String[] str : testData) {
-                    JFormattedTextField[] textFields = {dlugoscListka, szerokoscListka, dlugoscPlatka, szerokoscPlatka};
-                    Timer timer = new Timer(100, new ActionListener() {
+                JFormattedTextField[] textFields = {dlugoscListka, szerokoscListka, dlugoscPlatka, szerokoscPlatka};
+                    SwingWorker<Void, String> worker = new SwingWorker<Void, String>() {
                         @Override
-                        public void actionPerformed(ActionEvent e) {
-                            int currentIndex = 0;
-                            for (int i = 0; i < textFields.length; i++) {
-                                str[i].replace(".", ",");
-                                if (currentIndex < str[i].length()) {
-                                    textFields[i].setText(str[i].substring(0, currentIndex + 1));
-                                    currentIndex++;
-                                } else {
-                                    ((Timer) e.getSource()).stop();  // Zatrzymaj timer po napisaniu całego tekstu
+                        protected Void doInBackground() throws Exception {
+                            for (String[] str : testData) {
+                                for (int i = 0; i < textFields.length; i++) {
+                                    textFields[i].setText(str[i].replace(".", ","));
+                                    Thread.sleep(100);
                                 }
+                                k.setText("" + kValue);
+                                sub.doClick();
+                                Thread.sleep(2000);
+                                reset.doClick();
                             }
-                            sub.doClick();
+                            return null;
                         }
-                    });
-                    timer.start();
-                }
-            }else{
-                tout.setText("Wpisz ilość sąsiadów");
+                        @Override
+                        protected void done () {
+                            workerDone = true;
+                        }
+                    };
+                    worker.execute();
             }
+        }
+        else{
+            tout.setText("Wpisz ilość sąsiadów");
         }
     }
 }

@@ -56,13 +56,25 @@ public class AnalyzeData {
                 typy[index] = entrySet.getValue().size();
                 strResult[index] = entrySet.getKey();
             }
-            if(typy[index]==entrySet.getValue().size()){
+            if(typy[index]==entrySet.getValue().size() && typy[index]!=0){
                 index++;
                 typy[index] = entrySet.getValue().size();
                 strResult[index] = entrySet.getKey();
             }
         }
-        for(int i = 2; i>=0; i--){
+        for(int i = 0;i<typy.length-1;i++){
+            for(int j = i+1;j<typy.length;j++){
+                if(typy[i]<typy[j]){
+                    String tmpStr = strResult[i];
+                    strResult[i] = strResult[j];
+                    strResult[j] = tmpStr;
+                    int tmp = typy[i];
+                    typy[i] = typy[j];
+                    typy[j] = tmp;
+                }
+            }
+        }
+        for(int i = typy.length-1; i>=0; i--){
             if (typy[i]!=0){
                 return strResult[(int)(Math.random()*(i+1))];
             }
