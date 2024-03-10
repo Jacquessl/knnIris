@@ -21,6 +21,7 @@ class MyFrame
     private JFormattedTextField k;
     private JButton sub;
     private JButton reset;
+    private JButton zbiorTestowy;
     private JTextArea tout;
     private List<String[]> data;
     private NumberFormatter intFormatter;
@@ -139,6 +140,13 @@ class MyFrame
         reset.addActionListener(this);
         c.add(reset);
 
+        zbiorTestowy = new JButton("Uruchom Testowy Zbiór");
+        zbiorTestowy.setFont(new Font("Arial", Font.PLAIN, 15));
+        zbiorTestowy.setSize(220, 20);
+        zbiorTestowy.setLocation(150, 450);
+        zbiorTestowy.addActionListener(this);
+        c.add(zbiorTestowy);
+
         tout = new JTextArea();
         tout.setFont(new Font("Arial", Font.PLAIN, 15));
         tout.setSize(300, 400);
@@ -166,7 +174,7 @@ class MyFrame
             String[] dataToAnalyze = {dlugoscListka.getText(), szerokoscListka.getText(),
                     dlugoscPlatka.getText(), szerokoscPlatka.getText()};
             AnalyzeData ad = new AnalyzeData(data, dataToAnalyze, (Integer) k.getValue());
-            ad.analyze();
+            System.out.println(ad.analyze());
 
             // jak jest wszystko dobrze wyswietlic zdjecie
             // jak nie to wypisac wiadomosc o bledzie (np k wieksze niz jest dostepnych elementów)
@@ -185,6 +193,35 @@ class MyFrame
             tout.setText(def);
             formatter.setAllowsInvalid(false);
             intFormatter.setAllowsInvalid(false);
+        }
+        else if(e.getSource() == zbiorTestowy) {
+            if ((int)k.getValue() > 0) {
+                ReadData rd = new ReadData("irisTest.txt");
+                List<String[]> testData = rd.readData();
+
+                for (String[] str : testData) {
+                    JFormattedTextField[] textFields = {dlugoscListka, szerokoscListka, dlugoscPlatka, szerokoscPlatka};
+                    Timer timer = new Timer(100, new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            int currentIndex = 0;
+                            for (int i = 0; i < textFields.length - 1; i++) {
+                                str[i].replace(".", ",");
+                                if (currentIndex < str[i].length()) {
+                                    textFields[i].setText(str[i].substring(0, currentIndex + 1));
+                                    currentIndex++;
+                                } else {
+                                    ((Timer) e.getSource()).stop();  // Zatrzymaj timer po napisaniu całego tekstu
+                                }
+                            }
+                            sub.doClick();
+                        }
+                    });
+                    timer.start();
+                }
+            }else{
+                tout.setText("Wpisz ilość sąsiadów");
+            }
         }
     }
 }

@@ -9,7 +9,10 @@ public class AnalyzeData {
         this.dataToAnalyze = dataToAnalyze;
         this.k = k;
     }
-    public void analyze(){
+    public String analyze(){
+        if(k>data.size()){
+            return "Za dużo sąsiadów";
+        }
         Map<String, Set<Double>> mapa = new HashMap<>();
         double[] najblizsze = new double[k];
         for(int i = 0; i<najblizsze.length;i++){
@@ -45,6 +48,25 @@ public class AnalyzeData {
                 }
             }
         }
-        
+        int[] typy = new int[3];
+        int index=0;
+        String[] strResult = new String[3];
+        for(Map.Entry<String, List<Double>> entrySet : result.entrySet()){
+            if(typy[index]<entrySet.getValue().size()){
+                typy[index] = entrySet.getValue().size();
+                strResult[index] = entrySet.getKey();
+            }
+            if(typy[index]==entrySet.getValue().size()){
+                index++;
+                typy[index] = entrySet.getValue().size();
+                strResult[index] = entrySet.getKey();
+            }
+        }
+        for(int i = 2; i>=0; i--){
+            if (typy[i]!=0){
+                return strResult[(int)(Math.random()*(i+1))];
+            }
+        }
+        return strResult[0];
     }
 }
