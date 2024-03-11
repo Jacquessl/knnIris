@@ -182,20 +182,19 @@ class MyFrame
 
             dataToPrint+=result+"<br>";
             tout.setContentType("text/html");
-            ClassLoader classLoader = getClass().getClassLoader();
-            URL imageURL = classLoader.getResource("file:/img/" + result.toLowerCase() + ".jpg");
             if(wypisywacDokladnosc) {
-                if (result.equals(testData.get(testIndex)[4].replace("\r", ""))) {
+                if (result.equals(testData.get(testIndex)[4].replace("\rn", ""))) {
                     accurateTest++;
                 }
                 double dokladnosc = (double) (accurateTest) / (double) possibleTest;
                 int dokladnoscDoWypisania = (int) (dokladnosc * 100);
+
                 tout.setText("<html><body><div style='font-family: Arial, Helvetica, sans-serif; font-size: 15pt; text-align: center;'>" + dataToPrint +
-                        "<img src=\'file:img\\" + result.toLowerCase() + ".jpg\'/><br>Dokladność: " + dokladnoscDoWypisania + "%</div></body></html>");
+                        "<img src=\'file:img/" + result.toLowerCase().trim() + ".jpg\'/><br>Dokladność: " + dokladnoscDoWypisania + "%</div></body></html>");
             }
             else{
                 tout.setText("<html><body><div style='font-family: Arial, Helvetica, sans-serif; font-size: 15pt; text-align: center;'>" + dataToPrint +
-                        "<img src=\'file:img\\" + result.toLowerCase() + ".jpg\'/></div></body></html>");
+                        "<img src=\'file:img\\" + result.toLowerCase().trim() + ".jpg\'/></div></body></html>");
             }
             tout.setEditable(false);
         }

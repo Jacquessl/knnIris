@@ -74,9 +74,15 @@ public class AnalyzeData {
                 }
             }
         }
-        for(int i = typy.length-1; i>=0; i--){
-            if (typy[i]!=0){
-                return strResult[(int)(Math.random()*(i+1))];
+        for(int i = typy.length-1; i>0; i--){
+            if (typy[i]!=0 && typy[i]==typy[i-1]){
+                if(i==typy.length-1)
+                    if(typy[0]==typy[i]) {
+                        return strResult[(int) (Math.random() * (i + 1))];
+                    }
+                else{
+                        return strResult[(int) (Math.random() * (i + 1))];
+                    }
             }
         }
         return strResult[0];
