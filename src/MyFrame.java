@@ -217,7 +217,7 @@ class MyFrame
         else if(e.getSource() == zbiorTestowy) {
             try {
                 int kValue = (int) k.getValue();
-                ReadData rd = new ReadData("irisTest.txt");
+                ReadData rd = new ReadData("test-set.txt");
                 testData = rd.readData();
                 accurateTest = 0;
                 possibleTest = 1;
