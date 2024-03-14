@@ -12,7 +12,7 @@ import java.util.List;
 
 public class ReadData {
 
-    String path;
+    private String path;
 
     public ReadData(String path) {
         this.path = path;

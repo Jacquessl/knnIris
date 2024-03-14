@@ -131,7 +131,7 @@ class MyFrame
         k.setLocation(220, 300);
         c.add(k);
 
-        sub = new JButton("Submit");
+        sub = new JButton("Analizuj");
         sub.setFont(new Font("Arial", Font.PLAIN, 15));
         sub.setSize(100, 20);
         sub.setLocation(150, 400);
@@ -178,25 +178,27 @@ class MyFrame
             String[] dataToAnalyze = {dlugoscListka.getText(), szerokoscListka.getText(),
                     dlugoscPlatka.getText(), szerokoscPlatka.getText()};
             AnalyzeData ad = new AnalyzeData(data, dataToAnalyze, (Integer) k.getValue());
-            String result = ad.analyze();
+            try {
+                String result = ad.analyze();
 
-            dataToPrint+=result+"<br>";
-            tout.setContentType("text/html");
-            if(wypisywacDokladnosc) {
-                if (result.equals(testData.get(testIndex)[4].replace("\rn", ""))) {
-                    accurateTest++;
+                dataToPrint += result + "<br>";
+                tout.setContentType("text/html");
+                if (wypisywacDokladnosc) {
+                    if (result.trim().equals(testData.get(testIndex)[4].trim())) {
+                        accurateTest++;
+                    }
+                    tout.setText("<html><body><div style='font-family: Arial, Helvetica, sans-serif; font-size: 15pt; text-align: center;'>" + dataToPrint +
+                            "<img src=\'file:img/" + result.toLowerCase().trim() + ".jpg\'/><br>Dokladność: " + accurateTest + "/" + possibleTest + "</div></body></html>");
+                } else {
+                    tout.setText("<html><body><div style='font-family: Arial, Helvetica, sans-serif; font-size: 15pt; text-align: center;'>" + dataToPrint +
+                            "<img src=\'file:img\\" + result.toLowerCase().trim() + ".jpg\'/></div></body></html>");
                 }
-                double dokladnosc = (double) (accurateTest) / (double) possibleTest;
-                int dokladnoscDoWypisania = (int) (dokladnosc * 100);
+                tout.setEditable(false);
+            }catch (NumberFormatException ex){
+                tout.setText("Wpisz wartości");
+                tout.setEditable(false);
 
-                tout.setText("<html><body><div style='font-family: Arial, Helvetica, sans-serif; font-size: 15pt; text-align: center;'>" + dataToPrint +
-                        "<img src=\'file:img/" + result.toLowerCase().trim() + ".jpg\'/><br>Dokladność: " + dokladnoscDoWypisania + "%</div></body></html>");
             }
-            else{
-                tout.setText("<html><body><div style='font-family: Arial, Helvetica, sans-serif; font-size: 15pt; text-align: center;'>" + dataToPrint +
-                        "<img src=\'file:img\\" + result.toLowerCase().trim() + ".jpg\'/></div></body></html>");
-            }
-            tout.setEditable(false);
         }
         else if (e.getSource() == reset) {
             formatter.setAllowsInvalid(true);
@@ -223,6 +225,7 @@ class MyFrame
                     @Override
                     protected Void doInBackground() throws Exception {
                         for (String[] str : testData) {
+                            reset.doClick();
                             for (int i = 0; i < textFields.length; i++) {
                                 textFields[i].setText(str[i].replace(".", ","));
                                 Thread.sleep(100);
@@ -233,9 +236,10 @@ class MyFrame
                             testIndex++;
                             possibleTest++;
                             Thread.sleep(2000);
-                            reset.doClick();
+
                             wypisywacDokladnosc=false;
                         }
+                        testIndex=0;
                         return null;
                     }
 
